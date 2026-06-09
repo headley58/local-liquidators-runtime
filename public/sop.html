@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SOPs - Local Liquidators</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f1f5f9;
+      min-height: 100vh;
+    }
+    .header {
+      background: #2563eb;
+      color: white;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header h1 { font-size: 24px; }
+    .nav a {
+      color: white;
+      text-decoration: none;
+      margin-left: 30px;
+      opacity: 0.9;
+    }
+    .nav a:hover { opacity: 1; }
+    .container {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 40px;
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 32px;
+    }
+    .sidebar {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      height: fit-content;
+    }
+    .sidebar h2 {
+      font-size: 18px;
+      margin-bottom: 16px;
+      color: #1e293b;
+    }
+    .sop-list {
+      list-style: none;
+    }
+    .sop-list li {
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-bottom: 8px;
+      transition: background 0.2s;
+    }
+    .sop-list li:hover,
+    .sop-list li.active {
+      background: #eff6ff;
+      color: #2563eb;
+    }
+    .content {
+      background: white;
+      border-radius: 12px;
+      padding: 40px;
+      min-height: 600px;
+    }
+    .content h1 {
+      font-size: 32px;
+      margin-bottom: 24px;
+      color: #1e293b;
+    }
+    .content h2 {
+      font-size: 24px;
+      margin: 32px 0 16px;
+      color: #334155;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 8px;
+    }
+    .content h3 {
+      font-size: 20px;
+      margin: 24px 0 12px;
+      color: #475569;
+    }
+    .content p {
+      margin-bottom: 16px;
+      line-height: 1.7;
+      color: #475569;
+    }
+    .content ul,
+    .content ol {
+      margin-bottom: 16px;
+      padding-left: 24px;
+    }
+    .content li {
+      margin-bottom: 8px;
+      line-height: 1.6;
+    }
+    .content table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 24px 0;
+    }
+    .content th,
+    .content td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .content th {
+      background: #f8fafc;
+      font-weight: 600;
+      color: #475569;
+    }
+    .content code {
+      background: #f1f5f9;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+    .content pre {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 16px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin: 16px 0;
+    }
+    .placeholder {
+      color: #94a3b8;
+      text-align: center;
+      padding: 60px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🏠 Local Liquidators</h1>
+    <nav class="nav">
+      <a href="/">Home</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="/crm">CRM</a>
+      <a href="/pipeline">Pipeline</a>
+      <a href="/intake">Add Lead</a>
+      <a href="/sop">SOPs</a>
+    </nav>
+  </div>
+  
+  <div class="container">
+    <div class="sidebar">
+      <h2>Standard Operating Procedures</h2>
+      <ul class="sop-list">
+        <li onclick="loadSop('follow-up-sequences')" id="sop-follow-up-sequences">Follow-Up Sequences</li>
+        <li onclick="loadSop('lead-intake-sop')" id="sop-lead-intake-sop">Lead Intake</li>
+        <li onclick="loadSop('inventory-management-sop')" id="sop-inventory-management-sop">Inventory Management</li>
+      </ul>
+    </div>
+    
+    <div class="content" id="sop-content">
+      <div class="placeholder">
+        Select an SOP from the sidebar to view
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    function parseMarkdown(md) {
+      // Simple markdown parser
+      let html = md
+        .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+        .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+        .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+        .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
+        .replace(/\*(.*)\*/gim, '<em>$1</em>')
+        .replace(/`([^`]+)`/gim, '<code>$1</code>')
+        .replace(/```([\s\S]*?)```/gim, '<pre>$1</pre>')
+        .replace(/^\|(.+)\|$/gim, (match, p1) => {
+          const cells = p1.split('|').map(c => `<td>${c.trim()}</td>`).join('');
+          return `<tr>${cells}</tr>`;
+        })
+        .replace(/^- (.*$)/gim, '<li>$1</li>')
+        .replace(/^\d+\. (.*$)/gim, '<li>$1</li>')
+        .replace(/\n/gim, '<br>');
+      
+      // Wrap consecutive lis in ul
+      html = html.replace(/(<li>.*<\/li>)(<br>)*(<li>.*<\/li>)/gim, '<ul>$1$3</ul>');
+      
+      return html;
+    }
+    
+    async function loadSop(name) {
+      // Update active state
+      document.querySelectorAll('.sop-list li').forEach(li => li.classList.remove('active'));
+      document.getElementById(`sop-${name}`).classList.add('active');
+      
+      try {
+        const res = await fetch(`/sop/${name}.md`);
+        if (res.ok) {
+          const md = await res.text();
+          document.getElementById('sop-content').innerHTML = parseMarkdown(md);
+        } else {
+          document.getElementById('sop-content').innerHTML = '<div class="placeholder">SOP not found</div>';
+        }
+      } catch (e) {
+        document.getElementById('sop-content').innerHTML = '<div class="placeholder">Failed to load SOP</div>';
+      }
+    }
+    
+    // Load first SOP by default
+    loadSop('follow-up-sequences');
+  </script>
+</body>
+</html>

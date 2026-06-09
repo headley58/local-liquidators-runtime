@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Lead - Local Liquidators</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 32px;
+    }
+    .header h1 { font-size: 32px; margin-bottom: 8px; }
+    .header p { opacity: 0.9; }
+    .form-card {
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    }
+    .form-group {
+      margin-bottom: 24px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #374151;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #2563eb;
+    }
+    .form-group textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .btn {
+      background: #2563eb;
+      color: white;
+      padding: 16px 32px;
+      border-radius: 8px;
+      border: none;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.2s;
+    }
+    .btn:hover { background: #1d4ed8; }
+    .success {
+      background: #dcfce7;
+      color: #166534;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+      display: none;
+    }
+    .nav {
+      text-align: center;
+      margin-top: 24px;
+    }
+    .nav a {
+      color: white;
+      text-decoration: none;
+      opacity: 0.9;
+    }
+    .nav a:hover { opacity: 1; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🏠 Local Liquidators</h1>
+      <p>Add New Lead</p>
+    </div>
+    
+    <div class="form-card">
+      <div id="success" class="success">
+        Lead added successfully! <a href="/crm">View in CRM</a>
+      </div>
+      
+      <form id="lead-form">
+        <div class="form-group">
+          <label>Full Name *</label>
+          <input type="text" name="name" required placeholder="John Smith">
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" name="email" placeholder="john@example.com">
+          </div>
+          <div class="form-group">
+            <label>Phone</label>
+            <input type="tel" name="phone" placeholder="(555) 123-4567">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Status</label>
+            <select name="status">
+              <option value="Hot">Hot</option>
+              <option value="Warm" selected>Warm</option>
+              <option value="Cold">Cold</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Lead Type</label>
+            <select name="leadType">
+              <option value="Seller">Seller</option>
+              <option value="Buyer">Buyer</option>
+              <option value="Distress">Distress</option>
+              <option value="Builder">Builder</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>Property Address</label>
+          <input type="text" name="propertyAddress" placeholder="123 Main St, City, State">
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Property Value ($)</label>
+            <input type="number" name="propertyValue" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label>Timeline</label>
+            <select name="timeline">
+              <option value="ASAP">ASAP (30 days)</option>
+              <option value="1-3 Months" selected>1-3 Months</option>
+              <option value="3-6 Months">3-6 Months</option>
+              <option value="Exploring">Just Exploring</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>Notes</label>
+          <textarea name="notes" placeholder="Any additional information about this lead..."></textarea>
+        </div>
+        
+        <button type="submit" class="btn">Add Lead</button>
+      </form>
+    </div>
+    
+    <div class="nav">
+      <a href="/">← Back to Home</a>
+    </div>
+  </div>
+  
+  <script>
+    document.getElementById('lead-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const contact = Object.fromEntries(formData);
+      contact.propertyValue = parseInt(contact.propertyValue) || 0;
+      
+      try {
+        const res = await fetch('/api/contacts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(contact)
+        });
+        
+        if (res.ok) {
+          document.getElementById('success').style.display = 'block';
+          e.target.reset();
+          setTimeout(() => {
+            document.getElementById('success').style.display = 'none';
+          }, 5000);
+        }
+      } catch (e) {
+        console.error('Failed to add lead:', e);
+        alert('Failed to add lead. Please try again.');
+      }
+    });
+  </script>
+</body>
+</html>

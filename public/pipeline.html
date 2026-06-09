@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pipeline - Local Liquidators</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f1f5f9;
+      min-height: 100vh;
+    }
+    .header {
+      background: #2563eb;
+      color: white;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header h1 { font-size: 24px; }
+    .nav a {
+      color: white;
+      text-decoration: none;
+      margin-left: 30px;
+      opacity: 0.9;
+    }
+    .nav a:hover { opacity: 1; }
+    .container {
+      max-width: 1400px;
+      margin: 40px auto;
+      padding: 0 40px;
+    }
+    .pipeline {
+      display: flex;
+      gap: 16px;
+      overflow-x: auto;
+      padding-bottom: 20px;
+    }
+    .stage {
+      min-width: 280px;
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .stage-header {
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .stage-count {
+      background: #2563eb;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 14px;
+    }
+    .deal {
+      background: white;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .deal:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .deal-name {
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 8px;
+    }
+    .deal-value {
+      color: #2563eb;
+      font-weight: 600;
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+    .deal-address {
+      color: #64748b;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+    .deal-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .btn-move {
+      background: #f1f5f9;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      color: #475569;
+    }
+    .btn-move:hover {
+      background: #e2e8f0;
+    }
+    .btn-add {
+      background: #2563eb;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 6px;
+      text-decoration: none;
+      display: inline-block;
+      margin-bottom: 24px;
+    }
+    .empty {
+      text-align: center;
+      padding: 40px;
+      color: #94a3b8;
+      font-size: 14px;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      align-items: center;
+      justify-content: center;
+    }
+    .modal.active { display: flex; }
+    .modal-content {
+      background: white;
+      padding: 32px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
+    }
+    .modal-content h2 {
+      margin-bottom: 16px;
+    }
+    .stage-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .stage-option {
+      padding: 12px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .stage-option:hover {
+      border-color: #2563eb;
+      background: #eff6ff;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🏠 Local Liquidators</h1>
+    <nav class="nav">
+      <a href="/">Home</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="/crm">CRM</a>
+      <a href="/pipeline">Pipeline</a>
+      <a href="/intake">Add Lead</a>
+      <a href="/sop">SOPs</a>
+    </nav>
+  </div>
+  
+  <div class="container">
+    <a href="/crm" class="btn-add">+ Add Deal from CRM</a>
+    
+    <div id="pipeline" class="pipeline">
+      <div class="empty">Loading pipeline...</div>
+    </div>
+  </div>
+  
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <h2>Move Deal</h2>
+      <div id="stage-options" class="stage-options"></div>
+    </div>
+  </div>
+  
+  <script>
+    const STAGES = [
+      'New Lead', 'Contact Made', 'Qualified', 'Offer Made', 
+      'Negotiation', 'Contract Signed', 'Due Diligence', 
+      'Closing', 'Closed Won', 'Closed Lost'
+    ];
+    
+    let currentDealId = null;
+    
+    async function loadPipeline() {
+      try {
+        const [pipelineRes, contactsRes] = await Promise.all([
+          fetch('/api/pipeline'),
+          fetch('/api/contacts')
+        ]);
+        
+        const pipeline = await pipelineRes.json();
+        const contacts = await contactsRes.json();
+        
+        // Group deals by stage
+        const dealsByStage = {};
+        STAGES.forEach(stage => dealsByStage[stage] = []);
+        
+        pipeline.deals.forEach(deal => {
+          if (dealsByStage[deal.stage]) {
+            dealsByStage[deal.stage].push(deal);
+          }
+        });
+        
+        // Also show contacts without deals
+        const contactsWithDeals = new Set(pipeline.deals.map(d => d.contactId));
+        contacts.forEach(contact => {
+          if (!contactsWithDeals.has(contact.id)) {
+            dealsByStage['New Lead'].push({
+              id: null,
+              contactId: contact.id,
+              contactName: contact.name,
+              stage: 'New Lead',
+              value: contact.propertyValue || 0,
+              isContact: true
+            });
+          }
+        });
+        
+        const container = document.getElementById('pipeline');
+        container.innerHTML = STAGES.map(stage => `
+          <div class="stage">
+            <div class="stage-header">
+              <span>${stage}</span>
+              <span class="stage-count">${dealsByStage[stage].length}</span>
+            </div>
+            ${dealsByStage[stage].map(deal => `
+              <div class="deal" onclick="openMoveModal('${deal.id || deal.contactId}', '${deal.stage}', ${deal.isContact || false})">
+                <div class="deal-name">${deal.contactName}</div>
+                ${deal.value ? `<div class="deal-value">$${deal.value.toLocaleString()}</div>` : ''}
+                <div class="deal-actions">
+                  <button class="btn-move">Move →</button>
+                </div>
+              </div>
+            `).join('') || '<div class="empty">No deals</div>'}
+          </div>
+        `).join('');
+      } catch (e) {
+        console.error('Failed to load pipeline:', e);
+      }
+    }
+    
+    function openMoveModal(dealId, currentStage, isContact) {
+      currentDealId = { id: dealId, isContact };
+      const modal = document.getElementById('modal');
+      const options = document.getElementById('stage-options');
+      
+      options.innerHTML = STAGES.filter(s => s !== currentStage).map(stage => `
+        <div class="stage-option" onclick="moveDeal('${stage}')">
+          Move to ${stage}
+        </div>
+      `).join('');
+      
+      modal.classList.add('active');
+    }
+    
+    async function moveDeal(toStage) {
+      if (!currentDealId) return;
+      
+      try {
+        if (currentDealId.isContact) {
+          // Create deal first
+          const res = await fetch('/api/pipeline', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contactId: currentDealId.id, stage: toStage })
+          });
+          if (res.ok) {
+            document.getElementById('modal').classList.remove('active');
+            loadPipeline();
+          }
+        } else {
+          // Move existing deal
+          const res = await fetch('/api/pipeline/move', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ dealId: currentDealId.id, toStage })
+          });
+          if (res.ok) {
+            document.getElementById('modal').classList.remove('active');
+            loadPipeline();
+          }
+        }
+      } catch (e) {
+        console.error('Failed to move deal:', e);
+      }
+    }
+    
+    document.getElementById('modal').addEventListener('click', (e) => {
+      if (e.target.id === 'modal') {
+        document.getElementById('modal').classList.remove('active');
+      }
+    });
+    
+    loadPipeline();
+    setInterval(loadPipeline, 5000);
+  </script>
+</body>
+</html>

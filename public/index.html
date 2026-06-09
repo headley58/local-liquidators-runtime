@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Local Liquidators</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+    .container {
+      text-align: center;
+      padding: 40px;
+    }
+    .logo {
+      font-size: 80px;
+      margin-bottom: 20px;
+    }
+    h1 {
+      font-size: 48px;
+      margin-bottom: 10px;
+    }
+    .tagline {
+      font-size: 24px;
+      opacity: 0.9;
+      margin-bottom: 40px;
+    }
+    .nav {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .nav a {
+      background: white;
+      color: #2563eb;
+      padding: 15px 30px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: transform 0.2s;
+    }
+    .nav a:hover {
+      transform: translateY(-2px);
+    }
+    .footer {
+      margin-top: 60px;
+      opacity: 0.7;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">🏠</div>
+    <h1>Local Liquidators</h1>
+    <p class="tagline">Fast Cash For Your Property</p>
+    
+    <div class="nav">
+      <a href="/dashboard">Dashboard</a>
+      <a href="/crm">CRM</a>
+      <a href="/pipeline">Pipeline</a>
+      <a href="/intake">Add Lead</a>
+      <a href="/sop">SOPs</a>
+    </div>
+    
+    <div class="footer">
+      Local Liquidators Business Operating System v1.0
+    </div>
+  </div>
+</body>
+</html>

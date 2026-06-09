@@ -1,0 +1,16 @@
+{
+  "name": "local-liquidators",
+  "version": "1.0.0",
+  "description": "Local Liquidators Business Operating System",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node src/server.js",
+    "test": "node src/test.js",
+    "status": "bash scripts/status.sh"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
