@@ -2,6 +2,8 @@
 
 ## Quick Start
 
+### macOS / Linux
+
 ```bash
 # Extract archive
 tar -xzvf local-liquidators-runtime.tar.gz
@@ -15,6 +17,17 @@ cd local-liquidators
 # Or manually:
 node src/server.js
 ```
+
+### Windows
+
+Extract the package, open Command Prompt in the package directory, and run:
+
+```bat
+start.cmd
+```
+
+The Windows launcher checks for Node.js, creates the data directory, and starts
+the server without requiring Bash. You can also run `npm run start:windows`.
 
 ## Access Points
 
@@ -34,6 +47,12 @@ node src/test.js
 
 ```bash
 bash scripts/status.sh
+```
+
+On Windows:
+
+```bat
+scripts\status.cmd
 ```
 
 ## Requirements

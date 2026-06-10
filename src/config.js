@@ -8,7 +8,7 @@ const CONFIG = {
   BRAND: {
     name: 'Local Liquidators',
     tagline: 'Fast Cash For Your Property',
-    logo: '🏠',
+    logo: '\u{1F3E0}',
     primaryColor: '#2563eb',
     secondaryColor: '#1e40af'
   }

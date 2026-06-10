@@ -9,10 +9,10 @@ let testsFailed = 0;
 async function test(name, fn) {
   try {
     await fn();
-    console.log(`✓ ${name}`);
+    console.log(`[PASS] ${name}`);
     testsPassed++;
   } catch (e) {
-    console.log(`✗ ${name}: ${e.message}`);
+    console.log(`[FAIL] ${name}: ${e.message}`);
     testsFailed++;
   }
 }
@@ -46,7 +46,7 @@ function request(path, method = 'GET', body = null) {
 }
 
 async function runTests() {
-  console.log('🏠 Local Liquidators - Test Suite');
+  console.log('Local Liquidators - Test Suite');
   console.log('==================================\n');
   
   // Wait for server

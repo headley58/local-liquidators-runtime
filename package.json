@@ -5,9 +5,11 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
+    "start:windows": "start.cmd",
     "dev": "node src/server.js",
     "test": "node src/test.js",
-    "status": "bash scripts/status.sh"
+    "status": "bash scripts/status.sh",
+    "status:windows": "scripts\\status.cmd"
   },
   "dependencies": {},
   "engines": {
