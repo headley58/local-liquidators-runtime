@@ -72,7 +72,8 @@ const server = http.createServer((req, res) => {
   }
   
   if (pathname.startsWith('/sop/')) {
-    const sopFile = pathname.replace('/sop/', './sop/') + '.md';
+    const sopPath = pathname.replace('/sop/', './sop/');
+    const sopFile = sopPath.endsWith('.md') ? sopPath : sopPath + '.md';
     serveStaticFile(sopFile, res);
     return;
   }
